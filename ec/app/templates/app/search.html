@@ -4,24 +4,20 @@
 {% block main-content %}
 <div class="container my-5">
     <div class="row justify-content-start">
-        <div class="col-sm-2 ">
-            <div class="row">
-                {% for prod in product %}
-                    <div class="col-sm-6 text-center mb-4 hover-shadow">
-                        <a href="{% url 'product-detail' prod.id %}" class="btn">
-                            <div>
-                                <img src="{{prod.product_image.url}}" width="220px" height="200px" />
-                                <div class="fw-bold">{{prod.title}}</div>
-                                <div class="fw-bold text-danger">
-                                    $ {{prod.discounted_price}}/-
-                                    <small class="fw-light text-decoration-line-through">{{prod.selling_price}}</small>
-                                </div>
-                            </div>
+        {% for prod in product %}
+            <div class="col-md-3 col-sm-6 text-center mb-4 hover-shadow">
+                <a href="{% url 'product-detail' prod.id %}" class="btn">
+                    <div>
+                        <img src="{{prod.product_image.url}}" width="220px" height="200px" />
+                        <div class="fw-bold">{{prod.title}}</div>
+                        <div class="fw-bold text-danger">
+                            $ {{prod.discounted_price}}/-
+                            <small class="fw-light text-decoration-line-through">{{prod.selling_price}}</small>
                         </div>
-                    </a>
-                </div>
-                {% endfor %}
-        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock main-content %}
