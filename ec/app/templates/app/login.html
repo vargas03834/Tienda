@@ -5,7 +5,7 @@
 <div class="container">
     <div class="row my-3">
     <div class="col-sm-6 offset-sm-3">
-        <h3>Login</h3>
+        <h3>Inicia Sesión</h3>
         <hr>
         <form action="" method="post" novalidate class="shadow p-5">
             {% csrf_token %}
@@ -14,10 +14,10 @@
             {% endfor %}
 
             <small><a href="{% url "password_reset" %}">¿Olvidaste tu contraseña?</a></small><br>
-            <input type="submit" class="btn btn-primary mt-4" value="Login">
+            <input type="submit" class="btn btn-dark mt-4" value="Entrar">
             <div class="text-center text-primary fw-bold">
                 <small>¿Nuevo usuario? <a href="{% url "customerregistration" %}"
-                class="text-danger">Crea una cuenta</a></small>
+                class="text-dark">Crea una cuenta</a></small>
             </div>
 
         {% if form.non_field_errors %}
