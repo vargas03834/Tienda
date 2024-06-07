@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Enlaces a los archivos CSS de Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>
+    <!-- Enlaces a tus archivos CSS personalizados -->
+    <link rel="stylesheet" href="{% static 'app/css/owl.carousel.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'app/css/all.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'app/css/style.css' %}" />
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <title>SmartShop | {% block title %}{% endblock title %}</title>
+  </head>
+  <body>
+    <!-- Navbar Bootstrap -->
+   
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/"/>
+          <img src="{% static 'app/images/logo1.png' %}" width="50" height="70" />
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            {% if request.user.is_authenticated %}
+            <li class="nav-item-active">
+              <a class="nav-link text-white" aria-current="page" href="/" >Home </a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Productos</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="{% url "category" "ML" %}">SAMSUNG</a>
+                <a class="dropdown-item" href="{% url "category" "CR" %}">XIAOMI</a>
+                <a class="dropdown-item" href="{% url "category" "LS" %}">APPLE</a>
+                <a class="dropdown-item" href="{% url "category" "MS" %}">MOTOROLA</a>
+                <a class="dropdown-item" href="{% url "category" "PN" %}">TECNO</a>
+                <a class="dropdown-item" href="{% url "category" "GH" %}">REALME</a>
+                <a class="dropdown-item" href="{% url "category" "CZ" %}">VIVO</a>
+                <a class="dropdown-item" href="{% url "category" "IC" %}">HONOR </a>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{% url "chatbot" %}">Chatbot</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{% url "about" %}">About Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white" href="{% url "contact" %}">Contact Us</a>
+            </li>
+          </ul>
+          <form class="d-flex" role="search" action="/search">
+            <input class="form-control me-2" type="search" placeholder="Search" name="search" aria-label="Search"/>
+            <button class="btn btn-outline-dark" type="submit"> Buscar </button>
+          </form>
+        </div>
+
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item dropdown mx-2">
+            <a class="nav-link dropdown-toggle text-white" href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-expanded="false"> Usuario</a>
+            <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+              <li><a class="dropdown-item" href="{% url "profile" %}">Perfil</a></li>
+              <li><a class="dropdown-item" href="{% url "orders" %}">Pedidos</a></li>
+              <li><a class="dropdown-item" href="{% url "passwordchange" %}">Cambiar Contraseña</a></li>
+              <li><form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button class="dropdown-item" type="submit">Salir</button> </form> </li>
+            </ul>
+          </li>
+          <li class="nav-item mx-2">
+            <a href="{% url 'showcart' %}" class="nav-link text-white">
+                <span class="badge bg-danger">
+                    {% if totalitem > 0 %}
+                        {{ totalitem }}
+                    {% endif %}
+                </span>
+                <i class="fas fa-shopping-cart"></i> Carrito
+            </a>
+        </li>
+        
+          <li class="nav-item mx-2">
+            <a href="{% url "showwishlist" %}" class="nav-link text-white"><span class="badge bg-danger">{% if wishitem > 0 %} {{wishitem}} {% endif %} </span>
+              <i class="fas fa-heart"></i> Favorito
+          </a>
+                    </li>
+          {% else %}
+          <li class="nav-item mx-2">
+            <a href="{% url "login" %}" class="nav-link text-white"> Entrar </a>
+          </li>
+          <li class="nav-item mx-2">
+            <a href="{% url "customerregistration" %}" class="nav-link text-white"> Registrarse </a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    {% block banner-slider %}{% endblock banner-slider %}
+    {% block information %}{% endblock information %}
+    {% block main-content %}{% endblock main-content %}
+    {% block payment-gateway %}{% endblock payment-gateway %}
+
+    <footer class="container-fluid fixed-bottom bg-info text-center p-2 mt-5" > <small>&copy; 2024 Mobile Zone | Todos los derechos reservados | Desarrollado por: Tania Trejo</small></footer>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+    <!-- Otros scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <!-- Owl Carousel -->
+    <script src="{% static 'app/js/owl.carousel.min.js' %}"></script>
+    <!-- Font Awesome -->
+    <script src="{% static 'app/js/all.min.js' %}"></script>
+    <!-- Script personalizado -->
+    <script src="{% static 'app/js/myscript.js' %}"></script>
+
+  </body>
+</html>

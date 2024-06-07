@@ -1,0 +1,44 @@
+{% extends "app/base.html" %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+
+{% block banner-slider %}
+<div id="carouselExampleSlidesOnly" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="{% static 'app/images/banner/logo11.jpg' %}" class="d-block w-50 mx-auto custom-banner-image" alt="banner image">
+    </div>
+</div>
+{% endblock banner-slider %}
+
+{% block information %}
+<div class="container mt-5">
+    <div class="row bg-info text-center p-5 text-white border-bottom shadow rounded">
+        <div class="col">
+            <h1>¡Bienvenido a SmartShop!</h1>
+            <p class="fs-5 mt-3">
+                Descubre lo último en tecnología móvil. Explora nuestra amplia selección de smartphones de las mejores marcas. Desde los últimos lanzamientos hasta modelos clásicos, en SmartShop encontrarás el dispositivo perfecto para ti.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock information %}
+
+{% block main-content %}
+<div class="container mt-5 mb-5">
+    <h2 class="text-center mb-4">Explora nuestra colección de smartphones</h2>
+    <div class="row">
+        {% for brand, image, category_code in brands %}
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card h-100 text-center border-0 shadow-sm">
+                <a href="{% url 'category' category_code %}" class="stretched-link"></a>
+                <img src="{% static image %}" class="card-img-top img-fluid p-4" alt="{{ brand }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ brand }}</h5>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock main-content %}

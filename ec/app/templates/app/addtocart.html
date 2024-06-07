@@ -1,0 +1,142 @@
+{% extends "app/base.html" %}
+{% load static %}
+{% block title %}Cart{% endblock title %}
+{% block main-content %}
+<div class="container my-5">
+    <h1 class="text-center mb-5">Carrito de compra</h1>
+    <div class="row">
+        {% if cart %}
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="mb-4">Tu carrito</h3>
+                    {% for item in cart %}
+                    <div class="row mb-4 cart-item" data-product-id="{{ item.product.id }}">
+                        <div class="col-md-3 text-center align-self-center">
+                            <img src="{{ item.product.product_image.url }}" alt="{{ item.product.title }}" class="img-fluid rounded shadow" style="max-height: 150px;">
+                        </div>
+                        <div class="col-md-9">
+                            <h5>{{ item.product.title }}</h5>
+                            <p class="mb-2 text-muted small">{{ item.product.description }}</p>
+                            <div class="my-3">
+                                <label for="quantity">Cantidad: </label>
+                                <a class="minus-cart btn" pid="{{ item.product.id }}"><i class="fas fa-minus-square fa-lg"></i></a>
+                                <span class="quantity">{{ item.quantity }}</span>
+                                <a class="plus-cart btn" pid="{{ item.product.id }}"><i class="fas fa-plus-square fa-lg"></i></a>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <a href="javascript:void(0);" class="remove-cart btn btn-sm btn-secondary mr-3" pid="{{ item.product.id }}">Eliminar Item</a>
+                                <p class="mb-0"><span><strong>$ {{ item.product.discounted_price }}</strong></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="mb-4">Total</h3>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Subtotal:
+                            <span class="font-weight-bold" id="subtotal-amount">$ {{ amount }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Envío:
+                            <span>$ 10,0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Total (IVA incluido):</strong>
+                            <span class="font-weight-bold" id="total-amount">$ {{ amount|add:10 }}</span>
+                        </li>
+                    </ul>
+                    <a href="{% url 'checkout' %}" class="btn btn-primary btn-block">Realizar pedido</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-lg-12">
+            <h1 class="text-center">¡Tu carrito está vacío!</h1>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Remove item from cart
+        $('.remove-cart').click(function() {
+            var productId = $(this).attr('pid');
+            var cartItem = $(this).closest('.cart-item');
+            $.ajax({
+                url: '{% url "remove_from_cart" %}',
+                type: 'GET',
+                data: {
+                    'prod_id': productId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response) {
+                        cartItem.remove();
+                        $('#subtotal-amount').text('$' + response.amount);
+                        $('#total-amount').text('$' + response.totalamount);
+                        // Check if cart is empty after removal
+                        if ($('.cart-item').length === 0) {
+                            $('.container.my-5 .row').html('<div class="col-lg-12"><h1 class="text-center">¡Tu carrito está vacío!</h1></div>');
+                        }
+                    }
+                }
+            });
+        });
+
+        // Increase quantity
+        $('.plus-cart').click(function() {
+            var productId = $(this).attr('pid');
+            var cartItem = $(this).closest('.cart-item');
+            var quantityElement = cartItem.find('.quantity');
+            $.ajax({
+                url: '{% url "plus_cart" %}',
+                type: 'GET',
+                data: {
+                    'prod_id': productId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response) {
+                        quantityElement.text(response.quantity);
+                        $('#subtotal-amount').text('$' + response.amount);
+                        $('#total-amount').text('$' + response.totalamount);
+                    }
+                }
+            });
+        });
+
+        // Decrease quantity
+        $('.minus-cart').click(function() {
+            var productId = $(this).attr('pid');
+            var cartItem = $(this).closest('.cart-item');
+            var quantityElement = cartItem.find('.quantity');
+            $.ajax({
+                url: '{% url "minus_cart" %}',
+                type: 'GET',
+                data: {
+                    'prod_id': productId,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.quantity > 0) {
+                        quantityElement.text(response.quantity);
+                        $('#subtotal-amount').text('$' + response.amount);
+                        $('#total-amount').text('$' + response.totalamount);
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock main-content %}

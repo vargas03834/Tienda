@@ -1,0 +1,100 @@
+{% extends "app/base.html" %}
+{% load static %}
+
+{% block title %}Chatbot{% endblock title %}
+
+{% block main-content %}
+<style>
+    #chat-container {
+        width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #chat {
+        height: 300px;
+        overflow-y: scroll;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+    }
+
+    .message {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+
+    .user-message {
+        background-color: #f0f0f0;
+        text-align: right;
+    }
+
+    .bot-message {
+        background-color: #d2eaf4;
+        text-align: left;
+    }
+
+    #message {
+        width: calc(100% - 70px); /* Ajuste para el tamaño del botón */
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    #send-button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 90px; /* Nuevo ajuste para el tamaño */
+        height: 40px; /* Ajuste para la altura */
+        font-size: 16px; /* Tamaño de la fuente */
+        font-weight: bold; /* Negrita */
+    }
+</style>
+
+<div id="chat-container">
+    <div id="chat">
+        <div class="bot-message">
+            <img src="{% static 'app/images/product/chatbt.png' %}" alt="Chatbot" style="height: 60px; vertical-align: middle; margin-right: 5px;">
+            SmartShop: ¿En qué puedo ayudarte?
+        </div>
+    </div>
+
+    <form id="chat-form">
+        <input type="text" id="message" autocomplete="off" placeholder="Escribe tu mensaje aquí...">
+        <button type="submit" id="send-button">Enviar</button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#chat-form').on('submit', function (e) {
+            e.preventDefault();
+            var message = $('#message').val();
+            $('#chat').append('<div class="user-message">' + message + '</div>');
+            $.ajax({
+                type: 'POST',
+                url: '/chatbot/',
+                data: {
+                    'message': message,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    $('#chat').append('<div class="bot-message">' + data.message + '</div>');
+                    $('#message').val('');
+                    $('#chat').scrollTop($('#chat')[0].scrollHeight);
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock main-content %}
