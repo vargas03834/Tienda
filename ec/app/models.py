@@ -39,8 +39,6 @@ STATE_CHOICES = (
 )
 
 
-
-
 CATEGORY_CHOICES=(
     ('ML','SAMSUNG'),
     ('CR','XIAOMI'),

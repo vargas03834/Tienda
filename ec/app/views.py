@@ -1,6 +1,6 @@
 from django.db.models import Count
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 import razorpay # type: ignore
 from .models import Cart, Customer, OrderPlaced, Payment, Product, Wishlist
@@ -41,12 +41,38 @@ def contact(request):
     return render(request, "app/contact.html",locals())
 
 def chatbot(request):
-    totalitem = 0
-    wishitem = 0
-    if request.user.is_authenticated:
-        totalitem = len(Cart.objects.filter(user=request.user))
-        wishitem = len(Wishlist.objects.filter(user=request.user))
-    return render(request, "app/chatbot.html",locals())
+    if request.method == 'POST':
+        # Obtener el mensaje del usuario desde la solicitud POST
+        user_message = request.POST.get('message')
+
+        # Analizar el mensaje del usuario para identificar la pregunta
+        if 'celular' in user_message and 'recomiendas' in user_message:
+            # Generar la respuesta del chatbot
+            bot_response = "Te recomiendo el Samsung Galaxy A32. Es un excelente celular con buenas características y un precio asequible en Colombia."
+        elif 'celular' in user_message and 'economico' in user_message:
+            # Generar respuesta para el celular más económico en Colombia
+            bot_response = "Te recomiendo el Motorola Moto E7. Es un celular económico con un buen rendimiento y disponible a un precio accesible en Colombia."
+        elif 'celular' in user_message and 'caro' in user_message:
+            # Generar respuesta para el celular más caro en Colombia
+            bot_response = "El iPhone 13 Pro Max es uno de los celulares más caros disponibles en Colombia. Ofrece características premium y un rendimiento excepcional."
+        elif 'celular' in user_message and 'tendencia' in user_message:
+            # Generar respuesta para el celular en tendencia en Colombia
+            bot_response = "El Xiaomi Redmi Note 10 Pro es un celular muy popular en Colombia en este momento. Ofrece una gran relación calidad-precio y muchas personas lo están eligiendo."
+        else:
+            # Si la pregunta del usuario no se reconoce, dar una respuesta genérica
+            bot_response = "Lo siento, no entendí tu pregunta. ¿Podrías ser más específico?"
+
+        # Devolver la respuesta del chatbot como JSON
+        return JsonResponse({'message': bot_response})
+    else:
+        # Si la solicitud no es POST, renderizar la plantilla chatbot.html con las variables de contexto
+        totalitem = 0
+        wishitem = 0
+        if request.user.is_authenticated:
+            totalitem = len(Cart.objects.filter(user=request.user))
+            wishitem = len(Wishlist.objects.filter(user=request.user))
+        return render(request, "app/chatbot.html", {'totalitem': totalitem, 'wishitem': wishitem})
+
 
 @method_decorator(login_required,name='dispatch')
 class CategoryView(View):
@@ -170,10 +196,20 @@ class updateAddress(View):
 
 @login_required  
 def add_to_cart(request):
-    user=request.user
-    product_id=request.GET.get('prod_id')
-    product = Product.objects.get(id=product_id)
-    Cart(user=user,product=product).save()
+    user = request.user
+    product_id = request.GET.get('prod_id')
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Verificar si el producto ya está en el carrito del usuario
+    cart_item = Cart.objects.filter(user=user, product=product).first()
+    if cart_item:
+        # Si el producto ya está en el carrito, aumentar su cantidad
+        cart_item.quantity += 1
+        cart_item.save()
+    else:
+        # Si el producto no está en el carrito, agregarlo como un nuevo elemento
+        Cart.objects.create(user=user, product=product)
+    
     return redirect("/cart")
 
 @login_required    
