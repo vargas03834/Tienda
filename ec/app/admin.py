@@ -23,7 +23,7 @@ class CartModelAdmin(admin.ModelAdmin):
     
 @admin.register(Payment)
 class PaymentModelAdmin(admin.ModelAdmin):
-    list_display = ['id','user','amount','razorpay_order_id','razorpay_payment_status','razorpay_payment_id','paid']
+    list_display = ['id','user','amount','payu_order_id','payu_payment_status','payu_payment_id','paid']
 
 @admin.register(OrderPlaced)
 class OrderPlacedModelAdmin(admin.ModelAdmin):
@@ -38,7 +38,7 @@ class OrderPlacedModelAdmin(admin.ModelAdmin):
     
     def payments(self, obj):
         link = reverse("admin:app_payment_change", args=[obj.payment.pk])
-        return format_html('<a href="{}">{}</a>', link, obj.payment.razorpay_payment_id)
+        return format_html('<a href="{}">{}</a>', link, obj.payment.payu_payment_id)
     
    
 @admin.register(Wishlist)

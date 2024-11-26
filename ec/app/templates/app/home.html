@@ -4,9 +4,10 @@
 
 {% block banner-slider %}
 <div id="carouselExampleSlidesOnly" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-inner">
+    <div class="carousel-inner ">
         <div class="carousel-item active">
-            <img src="{% static 'app/images/banner/banner.png' %}" class="d-block w-50 mx-auto custom-banner-image" alt="banner image">
+            <img src="{% static 'app/images/banner/banner.png' %}" class="d-block w-100 custom-banner-image" alt="banner image">
+        </div>
     </div>
 </div>
 {% endblock banner-slider %}
@@ -15,9 +16,10 @@
 <div class="container mt-5">
     <div class="row bg-dark text-center p-5 text-white border-bottom shadow rounded">
         <div class="col">
-            <h1>¡Bienvenido a SmartShop!</h1>
+            <h1 class="display-4">¡Bienvenido a SmartShop!</h1>
             <p class="fs-5 mt-3">
-                Descubre lo último en tecnología móvil. Explora nuestra amplia selección de smartphones de las mejores marcas. Desde los últimos lanzamientos hasta modelos clásicos, en SmartShop encontrarás el dispositivo perfecto para ti.
+                Descubre lo último en tecnología móvil. Explora nuestra amplia selección de smartphones de las mejores marcas. 
+                Desde los últimos lanzamientos hasta modelos clásicos, en SmartShop encontrarás el dispositivo perfecto para ti.
             </p>
         </div>
     </div>
@@ -27,14 +29,14 @@
 {% block main-content %}
 <div class="container mt-5 mb-5">
     <h2 class="text-center mb-4">Explora nuestra colección de smartphones</h2>
-    <div class="row">
+    <div class="row g-4">
         {% for brand, image, category_code in brands %}
-        <div class="col-md-4 col-sm-6 mb-4">
-            <div class="card h-100 text-center border-0 shadow-sm">
+        <div class="col-lg-4 col-md-6 col-sm-12 product">
+            <div class="card h-100 text-center border-0 shadow-sm position-relative brand-card">
                 <a href="{% url 'category' category_code %}" class="stretched-link"></a>
-                <img src="{% static image %}" class="card-img-top img-fluid p-4" alt="{{ brand }}">
+                <img src="{% static image %}" class="card-img-top img-fluid p-4 brand-logo" alt="{{ brand }}">
                 <div class="card-body">
-                    <h5 class="card-title">{{ brand }}</h5>
+                    <h5 class="card-title text-primary fw-bold">{{ brand }}</h5>
                 </div>
             </div>
         </div>
@@ -42,3 +44,81 @@
     </div>
 </div>
 {% endblock main-content %}
+
+{% block extra-css %}
+<style>
+    /* Banner customizations */
+    .custom-banner-image {
+        max-height: 450px;
+        object-fit: cover;
+        animation: fadeIn 2s ease-in-out;
+    }
+
+    /* Brand card styles */
+    .brand-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        background: linear-gradient(to bottom, #f9f9f9, #ffffff);
+        animation: slideInUp 1s ease-in-out;
+    }
+
+    .brand-card:hover {
+        transform: translateY(-10px) scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .brand-card:hover .brand-logo {
+        transform: rotate(5deg) scale(1.1);
+    }
+
+    .brand-logo {
+        transition: transform 0.3s ease, filter 0.3s ease;
+        filter: grayscale(100%);
+    }
+
+    .brand-card:hover .brand-logo {
+        filter: grayscale(0%);
+    }
+
+    /* Typography */
+    .text-primary {
+        color: #007bff !important;
+    }
+
+    /* General spacing */
+    .g-4 {
+        gap: 1.5rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    @keyframes slideInUp {
+        0% {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock extra-css %}
+
+{% block extra-js %}
+<script>
+    // Custom JS for future interactivity if needed
+    document.addEventListener('DOMContentLoaded', () => {
+        const banners = document.querySelectorAll('.carousel-item');
+        banners.forEach((banner, index) => {
+            setTimeout(() => {
+                banner.classList.add('active');
+            }, index * 1000); // Delay each banner activation by 1 second
+        });
+    });
+</script>
+{% endblock extra-js %}

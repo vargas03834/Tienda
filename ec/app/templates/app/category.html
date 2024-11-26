@@ -6,33 +6,61 @@
 {% block main-content %}
 <div class="container my-5">
     <div class="row">
-        <div class="col-sm-3">
-            <div class="list-group">
+        <!-- Sidebar de categorías -->
+        <aside class="col-sm-3">
+            <div class="list-group shadow-sm">
                 {% for val in title %}
-                <a href="{% url 'category-title' val.title %}" class="list-group-item list-group-item-action" aria-current="true">{{ val.title }}</a>
+                <a href="{% url 'category-title' val.title %}" 
+                   class="list-group-item list-group-item-action py-3" 
+                   aria-current="true"
+                   aria-label="Ver productos en la categoría {{ val.title }}">
+                    {{ val.title }}
+                </a>
                 {% endfor %}
             </div>
-        </div>
-        <div class="col-sm-9">
+        </aside>
+
+        <!-- Sección de productos -->
+        <section class="col-sm-9">
             <div class="row">
                 {% for prod in product %}
-                <div class="col-md-4">
-                    <div class="text-center mb-4">
-                        <a href="{% url "product-detail" prod.id %}" class="btn">
-                            <div>
-                                <img src="{{ prod.product_image.url }}" width="200px" height="200px" />
-                                <div class="fw-bold">{{ prod.title }}</div>
-                                <div class="fw-bold text-danger">
-                                    Rs.{{ prod.discounted_price }}/- 
-                                    <small class="fw-light text-decoration-line-through">{{ prod.selling_price }}</small>
-                                </div>
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm text-center product">
+                        <a href="{% url 'product-detail' prod.id %}" 
+                           class="text-decoration-none text-dark" 
+                           aria-label="Ver detalles de {{ prod.title }}">
+                            <div class="p-3">
+                                <img src="{{ prod.product_image.url }}" 
+                                     class="card-img-top mx-auto d-block product-image" 
+                                     alt="{{ prod.title }}" 
+                                     style="height: 150px; width: 150px; object-fit: contain;">
+                            </div>
+                            <div class="card-body">
+                                <!-- Nombre del producto -->
+                                <h5 class="card-title fw-bold" style="color: #4a4a4a;">
+                                    {{ prod.title }}
+                                </h5>
+                                <!-- Precios -->
+                                <p class="card-text">
+                                    <span class="fw-bold" style="color: #28a745;"> 
+                                        ${{ prod.discounted_price }}
+                                    </span>
+                                    <small class="text-muted text-decoration-line-through">
+                                        ${{ prod.selling_price }}
+                                    </small>
+                                </p>
                             </div>
                         </a>
                     </div>
                 </div>
+                {% empty %}
+                <div class="col-12 text-center">
+                    <p class="text-muted">No se encontraron productos en esta categoría.</p>
+                </div>
                 {% endfor %}
             </div>
-        </div>
+        </section>
     </div>
 </div>
+
 {% endblock main-content %}

@@ -28,10 +28,14 @@
         </div>
         <div class="col-sm-4 offset-sm-2">
             <h4>Dirección de Envío</h4>
-            <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Escribe tu dirección de envío aquí">
-            <hr>
             <form method="post" id="myform">
                 {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label for="direccion" class="form-label">Escribe tu dirección de envío aquí</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Escribe tu dirección de envío" required>
+                </div>
+
                 {% for ad in add %}
                     <div class="card mb-3">
                         <h5>{{ ad.name }}</h5>
@@ -39,51 +43,36 @@
                         <p>{{ ad.locality }} {{ ad.city }} {{ ad.state }} - {{ ad.zipcode }}</p>
                     </div>
                     <div class="form-check mt-2 mb-4">
-                        <input class="form-check-input" type="radio" name="custid" id="custadd{{ forloop.counter }}" value="{{ ad.id }}">
+                        <input class="form-check-input" type="radio" name="custid" id="custadd{{ forloop.counter }}" value="{{ ad.id }}" required>
                         <label class="form-check-label fw-bold" for="custadd{{ forloop.counter }}">
                             Dirección: {{ forloop.counter }}
                         </label>
                     </div>
                 {% endfor %}
+                
                 <div class="form-check mb-3">
                     <label for="totamount" class="form-label">Monto Total</label>
                     <input type="text" class="form-control" name="totamount" value="{{ totalamount }}" readonly class="fw-bold">
                 </div>
+                
                 <div class="text-end">
-                    <button id="rzp-button1" type="submit" class="btn btn-warning mt-3 px-5 fw-bold">Pagar</button>
+                    <button id="button1" type="submit" class="btn btn-warning mt-3 px-5 fw-bold">Pagar</button>
                 </div>
             </form>
         </div>
     </div>
-</div>                    
-{% endblock main-content %}
+</div>
 
-{% block payment-gateway %}
-<script>
-    var options = {
-        "key": "{{ settings.RAZOR_KEY_ID }}", // Cambia esto a tu clave real
-        "amount": "{{ razoramount }}",
-        "currency": "INR",
-        "name": "SmartShops",
-        "description": "Compra de Producto",
-        "order_id": "{{ order_id }}",
-        "handler": function (response){
-            console.log("Éxito")
-            var form = document.getElementById("myform");
-            window.location.href = 'http://localhost:8000/paymentdone?order_id=' + response.razorpay_order_id + '&payment_id=' + response.razorpay_payment_id + '&cust_id=' + form.elements["custid"].value;
-        },
-        "theme": {
-            "color": "#3399cc"
-        }
-    };
-    var rzp1 = new Razorpay(options);
-    rzp1.on('payment.failed', function (response){
-        alert(response.error.description);
-    });
-    document.getElementById('rzp-button1').onclick = function(e){
-        console.log("button click");
-        rzp1.open();
-        e.preventDefault();
-    }
+<script type="text/javascript">
+    var signature = "{{ signature }}";  // Variable de firma
+    var deviceSessionId = "{{ device_session_id }}";  // ID del dispositivo
+
+    // Usar estos valores en tu integración de PayU o en formularios
 </script>
-{% endblock payment-gateway %}
+
+<script type="text/javascript" src="https://maf.pagosonline.net/ws/fp/tags.js?id={{ device_session_id }}"></script>
+<noscript>
+   <iframe style="width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;" src="https://maf.pagosonline.net/ws/fp/tags.js?id={{ device_session_id }}"></iframe>
+</noscript>
+
+{% endblock main-content %}

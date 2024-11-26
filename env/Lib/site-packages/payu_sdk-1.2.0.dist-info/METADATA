@@ -1,0 +1,119 @@
+Metadata-Version: 2.1
+Name: payu-sdk
+Version: 1.2.0
+Summary: PayU Python SDK
+Home-page: https://github.com/payu-india/payu-sdk-python/releases
+Author: Ashish Kumar
+Author-email: dx@payu.in
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+
+PayU Python Serverside sdk
+===================
+
+----------
+Installation through package manager
+-------------
+```
+$pip install payu-sdk
+
+```
+----------
+
+If you are on python 3x pls run below:
+-------------
+```
+$pip3 install payu-sdk
+
+```
+----------
+Installation Manually
+-------------
+```
+download zip from releases, unzip and just drag & drop payu-sdk folder at your end.
+```
+----------
+**Usage**
+You need to set up your key and salt values, you can find in your dashboard.
+
+    import payu_sdk
+    client = payu_sdk.payUClient("<key>","<salt>")
+
+Next you have to collect payment params needed to make a payment request e.g.
+
+    params = {"txnid":"202005110207","amount":"10","productinfo":"iPhone","firstname":"userFirstName","email":"email@email.com"}
+
+You can also append user defined values to the params in udfs. e.g.
+
+    params = {"udf1":"street address","udf2":"city","udf3":"zip","udf4":"country","udf5":"some other value"
+
+**Generate Payment Hash**
+To get the payment hash you need to call generate_hash function as follows:
+
+    payu_sdk.Hasher.generate_hash(params)
+
+To generate API hash you'll need majorly four params (i.e. key,command,var1,salt), you can call inbuilt APIHash as follows:
+
+    apiHash = payu_sdk.Hasher.APIHash(hashForAPI)
+You can pass command & var1 as params : 
+
+    params = {"command":"verify_payment","var1":"7fa6c4783a363b3da573"}
+
+
+**Calling PayU APIs for payment flow**
+
+1). paymentRequest: you need to call this API to make payment, in response it will give you payment page where you can proceed & make a payment through payment modes. 
+
+    from payu_sdk.request import createRequest
+
+    req = createRequest.paymentRequest(payload) 
+
+  
+Sample payload e.g.
+            
+` payload="key=JPM7Fg&txnid=Y0l9PfSUr4b0Yf&amount=10.00&firstname=Ashish&email=test@gmail.com&phone=9876543210&productinfo=iPhone&pg=cash&bankcode=cash&surl=https://apiplayground-response.herokuapp.com/&furl=https://apiplayground-response.herokuapp.com/&hash=4c6b9f46b8bcbcabec24dcda88f74d317b6a75b94c019cdd7fad70320a8614031d7fd9a1d6f1bc63deb9ba026429c83d5db31805f88b4a74f565e664a5f85d20" `
+
+
+2). Verify payment API call : This API gives you the status of the transaction.We recommend to use this API to reconcile with PayU’s database once you receive the response. It has two types:
+
+    from payu_sdk.API import paymentAPI
+
+i). Verify Payment Status by Transaction ID :This API gives you the status of the transaction by passing transactionId as input parameter.
+
+    res = paymentAPI.verifyPayment.verifyPaymentStatusByTransactionID(payload_verifyPayment)
+
+sample payload : 
+
+`key=JPM7Fg&command=verify_payment&var1=7fa6c4783a363b3da573&hash=c24ee06c7cf40314ede424b1fcc2b97a12f97a7d3dd206876eef16660eb09fd374fd82861f66d8152e72d1c9e3ee37fc691d47d6a387502872b03c7338a50880"`
+
+ii). Verify Payment Status by PayUID : This API gives you the status of the transaction similar to verify_payment API. The only difference is that the input parameter in this API (i.e. var1) is the PayUID (MihpayID) generated at PayU’s end.
+
+    res = paymentAPI.verifyPayment.verifyPaymentStatusByPayUID(payload_verifyPayment)
+
+
+3). Refund APIs: This API is used to check the status of refund/cancel requests. Whenever the cancel_refund_transaction API is executed successfully, a request ID is returned in the output parameters for that particular request, var1 is Request ID 
+
+    Res = RefundAPI.refundTransaction(payload_ RefundAPI) 
+
+
+4). OFFER APIS: 
+
+    res = paymentAPI.OffersAPIs.CheckOfferStatusByCategoryAndCardNumber(payload_vOffersAPIs)
+
+
+**Validate Hash**
+After transaction is made, you need to cross-verify the hash to make sure it was not tempered. So, if the hash generated from validate hash matched the reverse_hash(you get after each transaction) that means transaction was not tempered.
+
+    payu_sdk.Hasher.validate_hash(params)
+
+> **Note:** Calculation of reverse hash is mandatory and we recommend this to be calculated after each transaction. 
+
+
+
+
+

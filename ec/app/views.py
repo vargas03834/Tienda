@@ -1,8 +1,11 @@
 from django.db.models import Count
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-import razorpay # type: ignore
+import payu # type: ignore
+import hashlib
+import json
+import requests
 from .models import Cart, Customer, OrderPlaced, Payment, Product, Wishlist
 from . forms import CustomerProfileForm, CustomerRegistrationForm
 from django.contrib import messages
@@ -10,7 +13,9 @@ from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-
+import hashlib
+import time
+from ec import settings
 
 # Create your views here.
 @login_required
@@ -76,15 +81,23 @@ def chatbot(request):
 
 @method_decorator(login_required,name='dispatch')
 class CategoryView(View):
-    def get(self,request,val):
+    def get(self, request, val):
         product = Product.objects.filter(category=val)
-        title = Product.objects.filter(category=val).values("title")
+        title = Product.objects.values("title").distinct()
+        brand_name = val  
         totalitem = 0
         wishitem = 0
         if request.user.is_authenticated:
             totalitem = len(Cart.objects.filter(user=request.user))
-            wishitem= len(Wishlist.objects.filter(user=request.user))
-        return render(request, "app/category.html",locals())
+            wishitem = len(Wishlist.objects.filter(user=request.user))
+        context = {
+            'product': product,
+            'title': title,
+            'brand_name': brand_name,
+            'totalitem': totalitem,
+            'wishitem': wishitem,
+        }
+        return render(request, "app/category.html", context)
     
 @method_decorator(login_required,name='dispatch')
 class CategoryTitle(View):
@@ -240,8 +253,16 @@ def show_wishlist(request):
     return render(request,"app/wishlist.html",locals())
     
 
-@method_decorator(login_required,name='dispatch')
-class checkout(View):
+def generate_signature(api_key, merchant_id, reference_code, amount, currency):
+    signature_str = f"{api_key}~{merchant_id}~{reference_code}~{amount}~{currency}"
+    return hashlib.sha512(signature_str.encode()).hexdigest().upper()
+
+# Función para generar el session_id del dispositivo
+def generate_device_session_id():
+    return str(int(time.time() * 1000))  # Puede ser algo único por sesión
+
+@method_decorator(login_required, name='dispatch')
+class Checkout(View):
     def get(self, request):
         totalitem = 0
         wishitem = 0
@@ -256,31 +277,82 @@ class checkout(View):
         for p in cart_items:
             value = p.quantity * p.product.discounted_price
             famount = famount + value
-        totalamount = famount + 10
-        razoramount = int(totalamount * 100)
+        totalamount = famount + 10  # Añadiendo un costo de envío fijo
+        payuamount = int(totalamount)
+        
+        # Crear los valores para la firma y el session_id
+        api_key = settings.PAYU_API_KEY
+        merchant_id = settings.PAYU_MERCHANT_ID
+        reference_code = f"order_{user.id}_{int(time.time())}"
+        currency = "COP"  # Usar la moneda correcta
+        signature = generate_signature(api_key, merchant_id, reference_code, payuamount, currency)
+        device_session_id = generate_device_session_id()
+
+        # Realizar la solicitud POST a la API de PayU
+        data = {
+            "language": "es",
+            "command": "SUBMIT_TRANSACTION",
+            "merchant": {
+                "apiKey": api_key,
+                "apiLogin": settings.PAYU_API_LOGIN
+            },
+            "transaction": {
+                "order": {
+                    "accountId": merchant_id,
+                    "referenceCode": reference_code,
+                    "description": "Compra de producto",
+                    "language": "es",
+                    "signature": signature,
+                    "notifyUrl": "https://www.yoursite.com/notification",  # URL para notificaciones
+                    "additionalValues": {
+                        "TX_VALUE": {
+                            "value": payuamount,
+                            "currency": currency
+                        }
+                    }
+                },
+                "payer": {
+                    "fullName": user.first_name + " " + user.last_name,  # Nombre del usuario
+                    "emailAddress": user.email,
+                    "contactPhone": "123456789"
+                }
+            }
+        }
 
         try:
-            client = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))  # type: ignore
-            data = {"amount": razoramount, "currency": "INR", "receipt": "order_rcptid_12"}
-            payment_response = client.order.create(data=data)
-            print(payment_response)
-            # {'id': 'order_OC3TBRems8CIg4', 'entity': 'order', 'amount': 11500, 'amount_paid': 0, 'amount_due': 11500, 'currency': 'INR', 'receipt': 'order_rcptid_12', 'offer_id': None, 'status': 'created', 'attempts': 0, 'notes': [], 'created_at': 1716056780}
-            order_id = payment_response['id']
-            order_status = payment_response['status']
-            if order_status == 'created':
-                payment = Payment(
-                    user=user,
-                    amount=totalamount,
-                    razorpay_order_id=order_id,
-                    razorpay_payment_status=order_status
-                )
-                payment.save()
+            response = requests.post(
+                "https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi",
+                json=data
+            )
+
+            if response.status_code == 200:
+                try:
+                    response_data = response.json()
+                    order_id = response_data.get('id', None)
+                    order_status = response_data.get('status', None)
+
+                    # Si la orden se ha creado correctamente, guardamos los detalles del pago
+                    if order_status == 'created':
+                        payment = Payment(
+                            user=user,
+                            amount=totalamount,
+                            payu_order_id=order_id,
+                            payu_payment_status=order_status
+                        )
+                        payment.save()
+                    else:
+                        order_id = None
+                except ValueError:
+                    print(f"Error parsing JSON response: {response.text}")
+                    order_id = None
             else:
+                print(f"Error in response from PAYU: {response.status_code} - {response.text}")
                 order_id = None
         except Exception as e:
-            print(f"Error creating Razorpay order: {e}")
+            print(f"Error creating PAYU order: {e}. Response: {getattr(e.response, 'text', 'No response text')}")
             order_id = None
 
+        # Renderizamos el template con los datos de la orden
         return render(request, 'app/checkout.html', {
             'order_id': order_id,
             'totalitem': totalitem,
@@ -289,22 +361,41 @@ class checkout(View):
             'cart_items': cart_items,
             'famount': famount,
             'totalamount': totalamount,
+            'signature': signature,  # Pasamos la firma a la plantilla
+            'device_session_id': device_session_id,  # Pasamos el deviceSessionId a la plantilla
         })
+    
     def post(self, request):
-        # Eliminar elementos del carrito después del pago
-        Cart.objects.filter(user=request.user).delete()
+        # Aquí gestionamos el pago, una vez que el cliente presione "Pagar"
+        order_id = request.POST.get('order_id')
 
-        # Simular un pago exitoso
-        pago_exitoso = True
+        if not order_id:
+            return redirect('checkout')  # Si no tenemos un order_id, regresamos al checkout
 
-        # Verificar el pago exitoso
-        if pago_exitoso:
-            # Redirigir a la página de pedidos
-            return redirect('orders')
+        # Suponiendo que la transacción fue aprobada por el cliente
+        # Verificamos el estado de la transacción de PayU
+        try:
+            # Realizamos una solicitud GET para verificar el estado de la orden
+            response = requests.get(
+                f"https://api.payulatam.com/payments-api/4.0/service.cgi/{order_id}",
+                params={"apiKey": settings.PAYU_API_KEY, "apiLogin": settings.PAYU_API_LOGIN}
+            )
 
-        # Si el pago no fue exitoso, redirigir a alguna otra página o mostrar un mensaje de error
-        return render(request, 'app/payment_failed.html')
-
+            if response.status_code == 200:
+                payment_response = response.json()
+                if payment_response.get('status') == 'success':
+                    # Actualizamos el estado del pago en tu base de datos
+                    payment = Payment.objects.get(payu_order_id=order_id)
+                    payment.payu_payment_status = 'success'
+                    payment.save()
+                    return redirect('orders')  # Redirige a una página de éxito
+                else:
+                    return redirect('app/payment_failed')  # Redirige a una página de fallo en el pago
+            else:
+                return redirect('app/payment_failed')
+        except Exception as e:
+            print(f"Error verifying PAYU payment status: {e}")
+            return redirect('app/payment_failed')
 
 @login_required
 def payment_done(request):
@@ -313,9 +404,9 @@ def payment_done(request):
     cust_id=request.GET.get('cust_id')
     user=request.user
     customer=Customer.objects.get(id=cust_id)
-    payment=Payment.objects.get(razorpay_order_id=order_id)
+    payment=Payment.objects.get(payu_order_id=order_id)
     payment.paid= True
-    payment.razorpay_payment_id = payment_id
+    payment.payu_payment_id = payment_id
     payment.save()
     cart=Cart.objects.filter(user=user)
     for c in cart:
@@ -342,8 +433,8 @@ def calculate_cart_amount(cart):
     return amount, total_amount
 
 def plus_cart(request):
-    if request.method == 'GET':
-        prod_id = request.GET['prod_id']
+    if request.method == 'POST':
+        prod_id = request.POST['prod_id']
         c = Cart.objects.filter(user=request.user, product=prod_id).first()
         c.quantity += 1
         c.save()
@@ -441,4 +532,3 @@ def search(request):
         wishitem = Wishlist.objects.filter(user=request.user).count()
     product = Product.objects.filter(Q(title__icontains=query))
     return render(request, "app/search.html", locals())
-

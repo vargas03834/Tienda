@@ -129,5 +129,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-RAZOR_KEY_ID = "rzp_test_LxRqAytA5m1RfA"
-RAZOR_KEY_SECRET = "5IXsKXQ4NR89wHUZNs3GNVur"
+PAYU_ENVIRONMENT = 'sandbox'
+#PAYU_API_URL = 'https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi'  # Cambia 'sandbox' a 'secure' en producción'
+PAYU_API_KEY = "4Vj8eK4rloUd272L48hsrarnUA"
+PAYU_API_LOGIN = "pRRXKOl8ikMmt9u"
+PAYU_MERCHANT_ID = '512321'
+PAYU_ACCOUNT_ID = ''
+

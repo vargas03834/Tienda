@@ -1,34 +1,97 @@
 {% extends "app/base.html" %}
 {% load static %}
-{% block title %}Celulares favoritos{% endblock title %}
+{% block title %}Celulares Favoritos{% endblock title %}
+
 {% block main-content %}
 <div class="container my-5">
- <div class="row justify-content-start">
-  <div class="col-sm-8">
-    <h2 class="mb-4">Celulares Favoritos</h2>
-    {% if product %}
-        <div class="row">
-            {% for prod in product %}
-                <div class="col-sm-5 text-center mb-4 hover-shadow">
-                    <a href="{% url "product-detail" prod.product.id %}" class="btn">
-                        <div>
-                            <img src="{{prod.product.product_image.url}}" width="300px" height="200px" />
-                            <div class="fw-bold">{{prod.product.title}}</div>
-                            <div class="fw-bold text-danger">
-                                $ {{prod.product.discounted_price}}/-
-                                <small class="fw-light text-decoration-line-through">{{prod.product.selling_price}}</small>
-                            </div>
+    <div class="row justify-content-start">
+        <div class="col-12">
+            <h2 class="mb-4 text-center text-custom-gray fw-bold">Celulares Favoritos</h2>
+            
+            {% if product %}
+                <div class="row g-4">
+                    {% for prod in product %}
+                        <div class="col-md-4 col-sm-6">
+                            <a href="{% url 'product-detail' prod.product.id %}" class="text-decoration-none text-dark">
+                                <div class="card border-0 shadow-sm h-100 product-card">
+                                    <img src="{{ prod.product.product_image.url }}" 
+                                         class="card-img-top img-fluid rounded" 
+                                         alt="{{ prod.product.title }}">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title fw-bold">{{ prod.product.title }}</h5>
+                                        <p class="text-danger fs-5 fw-bold">
+                                            ${{ prod.product.discounted_price }}
+                                            <small class="text-muted text-decoration-line-through">
+                                                ${{ prod.product.selling_price }}
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
                         </div>
-                    </a>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            {% else %}
+                <div class="alert alert-info mt-4" role="alert">
+                    ¡Ups! Parece que aún no tienes ningún celular en tu lista de favoritos. 
+                    <a href="{% url 'store-home' %}" class="alert-link">Explora nuestra tienda</a> y agrega algunos celulares a tu lista de deseos.
+                </div>
+            {% endif %}
         </div>
-    {% else %}
-        <div class="alert alert-info" role="alert">
-            ¡Ups! Parece que aún no tienes ningún celular en tu lista de favoritos. ¡Explora nuestra tienda y agrega algunos celulares a tu lista de deseos!
-        </div>
-    {% endif %}
-  </div>
- </div>
-</div> 
+    </div>
+</div>
 {% endblock main-content %}
+
+{% block extra-css %}
+<style>
+    /* General styling */
+    h2 {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Product card styles */
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Product image */
+    .card-img-top {
+        max-height: 200px;
+        object-fit: cover;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    /* Typography */
+    .card-title {
+        font-size: 1.2rem;
+        color: #212529;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    .alert {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .alert a {
+        font-weight: bold;
+    }
+</style>
+{% endblock extra-css %}
+
+{% block extra-js %}
+<script>
+    // Placeholder for future interactions, e.g., wishlist updates
+    console.log("Vista de celulares favoritos cargada.");
+</script>
+{% endblock extra-js %}

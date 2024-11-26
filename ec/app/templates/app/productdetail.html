@@ -1,37 +1,77 @@
 {% extends "app/base.html" %}
 {% load static %}
-{% block title %}Category{% endblock title %}
+
+{% block title %}Product Detail{% endblock title %}
 
 {% block main-content %}
-    <div class="container my-5">
-        <div class="row justify-content-between">
-            <div class="img2 col-lg-5 mt-5">
-                <img src="{{product.product_image.url}}" class="image img-fluid mt-3 text-sm-center w-100" alt="{{ product.title }}">
-            </div>
-            <div class="productdetail col-lg-5">
-                <h1 style="font-family: Georgia; font-size: 50px;">{{product.title}}</h1>
-                <h5>${{product.discounted_price}}/-Precio Ahora</h5>
-                <small class="text-decoration-line-through text-muted fs-5">
-                    <del>${{product.selling_price}} Precio Antes/-</del>
-                </small>
-                <br><br><h4>Características del producto</h4>
-                <ul class="fs-5" style="font-family: Radjdhani;">
-                    <li>Descripción: {{product.description}}</li>
-                    <li>Tamaño de pantalla: {{product.composition}}</li>
-                    <li>Modelo: {{product.prodapp}}</li>
-                </ul>
-
-                <form action="/add-to-cart" class="d-inline">
-                    <input type="hidden" name="prod_id" value="{{product.id}}" />
-                    <button type="submit" class="btn btn-dark shadow px-5 py-2">Add to Cart</button>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Imagen del producto -->
+            <img src="{{ product.product_image.url }}" class="img-fluid" alt="{{ product.title }}">
+        </div>
+        <div class="col-md-6">
+            <h1>{{ product.title }}</h1>
+            <p>{{ product.description }}</p>
+            <h2 class="text-success">${{ product.discounted_price }}</h2>
+            <div class="mt-4 d-flex flex-wrap align-items-center">
+                <form action="/add-to-cart" class="d-inline me-2 mb-2">
+                    <input type="hidden" name="prod_id" value="{{ product.id }}">
+                    <button type="submit" class="btn btn-dark shadow-sm px-5 py-2 product" aria-label="Añadir {{ product.title }} al Carrito">Añadir al Carrito</button>
                 </form>
-                <a href="{% url "showcart" %}" class="btn btn-warning shadow px-5 py-2 ms-2">Buy Now</a>
+                <a href="{% url 'showcart' %}" class="btn btn-warning shadow-sm px-5 py-2 me-2 mb-2 product" aria-label="Comprar {{ product.title }} Ahora">Comprar Ahora</a>
+                
                 {% if wishlist %}
-                    <a pid="{{product.id}}" class="minus-wishlist btn btn-danger shadow px-5 py-2 ms-2"><i class="fas fa-heart fa-lg"></i> Remove from Wishlist</a>
+                <button pid="{{ product.id }}" class="minus-wishlist btn btn-danger shadow-sm px-5 py-2 me-2 mb-2 product" aria-label="Eliminar {{ product.title }} de Favoritos">
+                    <i class="fas fa-heart fa-lg"></i> Eliminar de Favoritos
+                </button>
                 {% else %}
-                    <a pid="{{product.id}}" class="plus-wishlist btn btn-outline-secondary shadow px-5 py-2 ms-2 mt-3 text-center"><i class="fas fa-heart fa-lg"></i> Add to Wishlist</a>
+                <button pid="{{ product.id }}" class="plus-wishlist btn btn-outline-secondary shadow-sm px-5 py-2 me-2 mb-2" aria-label="Añadir {{ product.title }} a Favoritos">
+                    <i class="fas fa-heart fa-lg"></i> Añadir a Favoritos
+                </button>
                 {% endif %}
             </div>
         </div>
     </div>
+</div>
 {% endblock main-content %}
+
+{% block extra-css %}
+<link rel="stylesheet" href="{% static 'css/custom-styles.css' %}">
+{% endblock extra-css %}
+
+{% block extra-js %}
+<script src="{% static 'js/custom-scripts.js' %}"></script>
+<script>
+    document.querySelectorAll('.plus-wishlist, .minus-wishlist').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const pid = this.getAttribute('pid');
+            const isAdding = this.classList.contains('plus-wishlist');
+            const url = isAdding ? '{% url "add_to_wishlist" %}' : '{% url "remove_from_wishlist" %}';
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 'prod_id': pid })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (isAdding) {
+                        this.classList.remove('plus-wishlist', 'btn-outline-secondary');
+                        this.classList.add('minus-wishlist', 'btn-danger');
+                        this.innerHTML = '<i class="fas fa-heart fa-lg"></i> Eliminar de Favoritos';
+                    } else {
+                        this.classList.remove('minus-wishlist', 'btn-danger');
+                        this.classList.add('plus-wishlist', 'btn-outline-secondary');
+                        this.innerHTML = '<i class="fas fa-heart fa-lg"></i> Añadir a Favoritos';
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock extra-js %}

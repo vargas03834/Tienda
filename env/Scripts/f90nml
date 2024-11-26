@@ -1,0 +1,5 @@
+#!C:\Users\So\Documents\udenar\X\WEB\Tienda\env\Scripts\python.exe
+
+from f90nml import cli
+
+cli.parse()
