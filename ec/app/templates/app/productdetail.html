@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
 {% load static %}
+{% load static humanize %}
 
 {% block title %}Product Detail{% endblock title %}
 
@@ -13,7 +14,7 @@
         <div class="col-md-6">
             <h1>{{ product.title }}</h1>
             <p>{{ product.description }}</p>
-            <h2 class="text-success">${{ product.discounted_price }}</h2>
+            <h2 class="text-success">${{ product.discounted_price|floatformat:0|intcomma }}</h2>
             <div class="mt-4 d-flex flex-wrap align-items-center">
                 <form action="/add-to-cart" class="d-inline me-2 mb-2">
                     <input type="hidden" name="prod_id" value="{{ product.id }}">

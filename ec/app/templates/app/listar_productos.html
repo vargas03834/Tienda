@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
 {% load static %}
+{% load static humanize %}
 
 {% block title %}Lista de Productos{% endblock title %}
 
@@ -63,7 +64,7 @@
             </td>
             <td>{{ producto.title }}</td>
             <td>{{ producto.get_category_display }}</td> <!-- Nombre de la categoría -->
-            <td>${{ producto.discounted_price }}</td>
+            <td>${{ producto.discounted_price|floatformat:0|intcomma }}</td>
             <td class="actions">
                 <a href="{% url 'actualizar_producto' producto.id %}">Editar</a> |
                 <a href="{% url 'eliminar_producto' producto.id %}">Eliminar</a>

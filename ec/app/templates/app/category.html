@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
 {% load static %}
+{% load static humanize %}
 
 {% block title %}Category{% endblock title %}
 
@@ -43,10 +44,10 @@
                                 <!-- Precios -->
                                 <p class="card-text">
                                     <span class="fw-bold" style="color: #28a745;"> 
-                                        ${{ prod.discounted_price }}
+                                        ${{ prod.discounted_price|floatformat:0|intcomma }}
                                     </span>
                                     <small class="text-muted text-decoration-line-through">
-                                        ${{ prod.selling_price }}
+                                        ${{ prod.selling_price|floatformat:0|intcomma }}
                                     </small>
                                 </p>
                             </div>

@@ -504,6 +504,7 @@ def minus_wishlist(request):
         except Wishlist.DoesNotExist:
             data = {'message': 'Wishlist item not found'}
         return JsonResponse(data)
+    
 
     
 # views.py
