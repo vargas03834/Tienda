@@ -1,0 +1,81 @@
+{% extends "app/base.html" %}
+{% load static %}
+
+{% block title %}Eliminar Producto{% endblock title %}
+
+{% block main-content %}
+<h1>Eliminar Producto</h1>
+
+<!-- Estilo mejorado para la página de eliminación -->
+<style>
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #dc3545; /* Color rojo para indicar alerta */
+    }
+
+    .confirmation-message {
+        font-size: 18px;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+    }
+
+    .confirmation-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .confirmation-buttons button,
+    .confirmation-buttons a {
+        padding: 12px 25px;
+        text-decoration: none;
+        font-size: 16px;
+        border-radius: 5px;
+        width: 45%;
+        text-align: center;
+    }
+
+    .confirmation-buttons button.submit {
+        background-color: #dc3545; /* Rojo para eliminar */
+        color: white;
+        border: none;
+    }
+
+    .confirmation-buttons button.submit:hover {
+        background-color: #c82333;
+    }
+
+    .confirmation-buttons a {
+        background-color: #007bff; /* Azul para cancelar */
+        color: white;
+    }
+
+    .confirmation-buttons a:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<div class="container">
+    <p class="confirmation-message">¿Estás seguro de que quieres eliminar el producto <strong>"{{ producto.title }}"</strong>?</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="confirmation-buttons">
+            <button class="submit" type="submit">Eliminar</button>
+            <a href="{% url 'listar_productos' %}">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+{% endblock main-content %}

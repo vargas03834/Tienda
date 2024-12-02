@@ -1,0 +1,75 @@
+{% extends "app/base.html" %}
+{% load static %}
+
+{% block title %}Lista de Productos{% endblock title %}
+
+{% block main-content %}
+<h1>Lista de Productos</h1>
+<a href="{% url 'crear_producto' %}">Crear Producto</a>
+
+<!-- Agregamos algo de estilo para mejorar la apariencia de la tabla -->
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background-color: #f4f4f4;
+    }
+    img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    a {
+        color: #007BFF;
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+    .actions a {
+        margin-right: 10px;
+    }
+</style>
+
+<table>
+    <thead>
+        <tr>
+            <th>Imagen</th>
+            <th>Título</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for producto in productos %}
+        <tr>
+            <!-- Mostramos la imagen del producto si existe -->
+            <td>
+                {% if producto.product_image %}
+                    <img src="{{ producto.product_image.url }}" alt="{{ producto.title }}">
+                {% else %}
+                    <img src="{% static 'default_image.jpg' %}" alt="Imagen por defecto">
+                {% endif %}
+            </td>
+            <td>{{ producto.title }}</td>
+            <td>{{ producto.get_category_display }}</td> <!-- Nombre de la categoría -->
+            <td>${{ producto.discounted_price }}</td>
+            <td class="actions">
+                <a href="{% url 'actualizar_producto' producto.id %}">Editar</a> |
+                <a href="{% url 'eliminar_producto' producto.id %}">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock main-content %}

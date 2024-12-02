@@ -1,0 +1,51 @@
+{% extends "app/base.html" %}
+{% load static %}
+
+{% block title %}Actualizar Producto: {{ producto.title }}{% endblock title %}
+
+{% block main-content %}
+<h1>Actualizar Producto: {{ producto.title }}</h1>
+
+<!-- Estilo mejorado para el formulario -->
+<style>
+    form {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    form h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    form input, form select, form textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    button:hover {
+        background-color: #218838;
+    }
+</style>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div>
+        {{ form.as_p }}
+    </div>
+    <button type="submit">Actualizar Producto</button>
+</form>
+{% endblock main-content %}

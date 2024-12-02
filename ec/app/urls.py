@@ -33,8 +33,8 @@ urlpatterns = [
     path('removecart/', views.remove_cart, name='remove_from_cart'),
     path('pluswishlist/', views.plus_wishlist),
     path('minuswishlist/', views.minus_wishlist),
-    path('add-to-wishlist/', views.add_to_wishlist, name='add_to_wishlist'),
-    path('remove-from-wishlist/', views.remove_from_wishlist, name='remove_from_wishlist'),
+    #path('add-to-wishlist/', views.add_to_wishlist, name='add_to_wishlist'),
+    #path('remove-from-wishlist/', views.remove_from_wishlist, name='remove_from_wishlist'),
     
     #login authentication
     path('registration/', views.CustomerRegistrationView.as_view(), name='customerregistration'),
@@ -48,6 +48,13 @@ urlpatterns = [
     path('password-reset-confirm/<uidb64>/<token>/', auth_view.PasswordResetConfirmView.as_view(template_name='app/password_reset_confirm.html',form_class=MySetPasswordForm), name='password_reset_confirm'),  
     path('password-reset-complete/', auth_view.PasswordResetCompleteView.as_view(template_name='app/password_reset_complete.html'), name='password_reset_complete'),
     
+    path('productos/', views.listar_productos, name='listar_productos'),  # Listar productos
+    path('producto/crear/', views.crear_producto, name='crear_producto'),  # Crear producto
+    path('producto/actualizar/<int:producto_id>/', views.actualizar_producto, name='actualizar_producto'),  # Actualizar producto
+    path('producto/eliminar/<int:producto_id>/', views.eliminar_producto, name='eliminar_producto'),  # Eliminar producto
+
+
+
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.site_header = "SmartShop"

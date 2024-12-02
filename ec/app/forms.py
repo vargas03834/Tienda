@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField, PasswordChangeForm, SetPasswordForm, PasswordResetForm
 from django.contrib.auth.models import User
+from .models import Product
 
 from .models import Customer
 
@@ -44,3 +45,9 @@ class CustomerProfileForm(forms.ModelForm):
             'state':forms.Select(attrs={'class':'form-control'}),
             'zipcode':forms.NumberInput(attrs={'class':'form-control'}),
         }
+
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['title', 'selling_price', 'discounted_price', 'description', 'composition', 'prodapp', 'category', 'product_image']
+

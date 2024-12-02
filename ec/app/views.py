@@ -16,6 +16,7 @@ from django.utils.decorators import method_decorator
 import hashlib
 import time
 from ec import settings
+from .forms import ProductForm
 
 # Create your views here.
 @login_required
@@ -532,3 +533,40 @@ def search(request):
         wishitem = Wishlist.objects.filter(user=request.user).count()
     product = Product.objects.filter(Q(title__icontains=query))
     return render(request, "app/search.html", locals())
+
+
+def crear_producto(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES)  # Usamos request.FILES para manejar imágenes
+        if form.is_valid():
+            form.save()  # Guarda el nuevo producto
+            return redirect('listar_productos')  # Redirige a la lista de productos
+    else:
+        form = ProductForm()  # Si es GET, inicializa un formulario vacío
+    return render(request, 'app/crear_producto.html', {'form': form})
+
+
+# views.py
+
+def listar_productos(request):
+    productos = Product.objects.all()  # Obtener todos los productos
+    return render(request, 'app/listar_productos.html', {'productos': productos})
+
+def actualizar_producto(request, producto_id):
+    producto = get_object_or_404(Product, pk=producto_id)
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES, instance=producto)
+        if form.is_valid():
+            form.save()  # Guarda los cambios
+            return redirect('listar_productos')  # Redirige a la lista de productos
+    else:
+        form = ProductForm(instance=producto)  # Carga el formulario con los datos del producto
+    return render(request, 'app/actualizar_producto.html', {'form': form, 'producto': producto})
+
+def eliminar_producto(request, producto_id):
+    producto = get_object_or_404(Product, pk=producto_id)
+    if request.method == "POST":
+        producto.delete()  # Elimina el producto de la base de datos
+        return redirect('listar_productos')  # Redirige a la lista de productos
+    return render(request, 'app/eliminar_producto.html', {'producto': producto})
+
