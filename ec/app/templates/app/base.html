@@ -37,7 +37,7 @@
           <ul class="navbar-nav me-auto">
             {% if request.user.is_authenticated %}
               <li class="nav-item">
-                <a class="nav-link active" href="/">Home</a>
+                <a class="nav-link active" href="/">Inicio</a>
               </li>
               <li class="nav-item dropdown ">
                 <a class="nav-link dropdown-toggle" href="#" id="productDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Productos</a>
@@ -56,13 +56,13 @@
                 <a class="nav-link" href="{% url 'chatbot' %}">Chatbot</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'about' %}">About Us</a>
+                <a class="nav-link" href="{% url 'about' %}">Sobre Nosotros</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'contact' %}">Contact Us</a>
+                <a class="nav-link" href="{% url 'contact' %}">Contactanos</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'listar_productos' %}">Admin</a>
+                <a class="nav-link" href="{% url 'listar_productos' %}">Administrar</a>
               </li>
             {% endif %}
           </ul>
@@ -121,7 +121,7 @@
 
     <!-- Footer -->
     <footer class="bg-dark text-white text-center py-3">
-      <div>&copy; 2024 SmartShop | Todos los derechos reservados | Desarrollado por: Software ST</div>
+      <div>&copy; 2024 SmartShop | Todos los derechos reservados | Desarrollado por: Andres Muñoz - Santiago Vargas</div>
     </footer>
 
     <!-- Bootstrap JS -->
